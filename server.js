@@ -15,34 +15,13 @@ import dashboardRoutes from "./routes/dashboard.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 
 import { errorHandler } from "./middlewares/error.middleware.js";
-import {initSocket} from "./sockets/socket.js"
-import path from "path"
+import { initSocket } from "./sockets/socket.js";
+import path from "path";
 
 const app = express();
 const server = http.createServer(app);
 
-// init socket
-initSocket(server);
-
-// server.listen(5000, () => {
-//   console.log("Server running on port 5000");
-// });
-
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
-
-
-
-// Socket setup
-const io = new Server(server, {
-  cors: {
-    origin: ENV.CLIENT_URL,
-    credentials: true
-  }
-});
-
-initSocket(io);
-app.set("io", io);
-
+// ✅ CORS must be FIRST
 app.use(cors({
   origin: [
     'http://localhost:5173',
@@ -57,6 +36,22 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+// Socket setup (only once)
+const io = new Server(server, {
+  cors: {
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://farmora-front-9spo.vercel.app'
+    ],
+    credentials: true
+  }
+});
+
+initSocket(io);
+app.set("io", io);
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -66,15 +61,12 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-// Health check
 app.get("/", (req, res) => {
   res.send("Farmora API Running...");
 });
 
-// Error Middleware
 app.use(errorHandler);
 
-// Start server
 const startServer = async () => {
   await connectDB();
   server.listen(ENV.PORT, () => {
