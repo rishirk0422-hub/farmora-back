@@ -43,10 +43,15 @@ const io = new Server(server, {
 initSocket(io);
 app.set("io", io);
 
-// Middleware
 app.use(cors({
-  origin: ENV.CLIENT_URL,
-  credentials: true
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://farmora-front-9spo.vercel.app'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
