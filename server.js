@@ -21,39 +21,48 @@ import path from "path";
 const app = express();
 const server = http.createServer(app);
 
-// ✅ CORS must be FIRST
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://farmora-front-9spo.vercel.app'
-  ],
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  ENV.CLIENT_URL, // reads from .env — no trailing slash!
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (e.g. mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS blocked: ${origin}`));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+// ✅ CORS middleware first
+app.use(cors(corsOptions));
+
+// ✅ Explicitly handle OPTIONS preflight for all routes
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-// Socket setup (only once)
 const io = new Server(server, {
   cors: {
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'https://farmora-front-9spo.vercel.app'
-    ],
-    credentials: true
+    origin: allowedOrigins,
+    credentials: true,
   }
 });
 
 initSocket(io);
 app.set("io", io);
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
@@ -61,17 +70,12 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Farmora API Running...");
-});
-
+app.get("/", (req, res) => res.send("Farmora API Running..."));
 app.use(errorHandler);
 
 const startServer = async () => {
   await connectDB();
-  server.listen(ENV.PORT, () => {
-    console.log(`Server running on port ${ENV.PORT}`);
-  });
+  server.listen(ENV.PORT, () => console.log(`Server running on port ${ENV.PORT}`));
 };
 
 startServer();
