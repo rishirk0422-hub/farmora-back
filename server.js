@@ -14,7 +14,8 @@ import productRoutes from "./routes/product.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
-import categoryRoutes, { initCategoryTable } from "./routes/masters/category.routes.js";
+import { initCategoryTable } from "./routes/masters/category.routes.js";
+import categoryRoutes from "./routes/masters/category.routes"
 
 import { errorHandler } from "./middlewares/error.middleware.js";
 import { initSocket } from "./sockets/socket.js";
