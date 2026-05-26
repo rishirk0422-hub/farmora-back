@@ -1,12 +1,14 @@
 import multer from "multer";
-import path from "path";
-import { v4 as uuidv4 } from "uuid";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from "./cloudinary.js"; // your existing cloudinary config
 
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: (req, file, cb) => {
-    cb(null, uuidv4() + path.extname(file.originalname));
-  }
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "farmora/products",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [{ width: 800, height: 800, crop: "limit" }],
+  },
 });
 
 export const upload = multer({ storage });
