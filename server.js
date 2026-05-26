@@ -16,6 +16,8 @@ import dashboardRoutes from "./routes/dashboard.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import { initCategoryTable } from "./routes/masters/category.routes.js";
 import categoryRoutes from "./routes/masters/category.routes.js"
+import unitRoutes, { initUnitTable } from "./routes/masters/unit.routes.js";
+
 
 import { errorHandler } from "./middlewares/error.middleware.js";
 import { initSocket } from "./sockets/socket.js";
@@ -72,6 +74,8 @@ app.use("/api/notifications", notificationRoutes);
 
 // ── PostgreSQL master routes ─────────────────────────────────────────────────
 app.use("/api/masters/categories", categoryRoutes);
+app.use("/api/masters/units", unitRoutes);
+
 
 app.get("/", (req, res) => res.send("Farmora API Running..."));
 app.use(errorHandler);
@@ -85,6 +89,7 @@ const startServer = async () => {
     await pool.query("SELECT 1");
     console.log("✅ PostgreSQL (Neon) connected");
     await initCategoryTable();
+    await initUnitTable()
   } catch (err) {
     console.error("❌ PostgreSQL connection failed:", err.message);
     // Don't crash — MongoDB routes still work without PG
