@@ -1,5 +1,5 @@
 import express from "express";
-import { pool } from "../config/pgdb.js";
+import { pool } from "../../config/pgdb.js"
 import { protect } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
