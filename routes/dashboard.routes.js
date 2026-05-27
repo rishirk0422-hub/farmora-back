@@ -1,14 +1,9 @@
 import express from "express";
-import {
-  sellerDashboard,
-  buyerDashboard
-} from "../controllers/dashboard.controller.js";
-import { protect } from "../middlewares/auth.middleware.js";
-import { authorizeRoles } from "../middlewares/role.middleware.js";
+import { getDashboardStats } from "../controllers/dashboard.controller.js"; 
+import { protect } from "../middlewares/auth.middleware.js
 
 const router = express.Router();
 
-router.get("/seller", protect, authorizeRoles("seller"), sellerDashboard);
-router.get("/buyer", protect, authorizeRoles("buyer"), buyerDashboard);
+router.get("/stats", protect, getDashboardStats);
 
 export default router;
