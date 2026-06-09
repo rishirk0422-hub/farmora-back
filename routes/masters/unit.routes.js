@@ -20,11 +20,25 @@ export const initUnitTable = async () => {
   console.log("✅ Units table ready");
 };
 
-// GET all
+// GET all (paginated) — ?page=1&limit=10
 router.get("/", protect, async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM units ORDER BY id DESC");
-    res.json(result.rows);
+    const page   = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit  = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
+    const offset = (page - 1) * limit;
+
+    const [dataResult, countResult] = await Promise.all([
+      pool.query("SELECT * FROM units ORDER BY id DESC LIMIT $1 OFFSET $2", [limit, offset]),
+      pool.query("SELECT COUNT(*) FROM units"),
+    ]);
+
+    const total      = parseInt(countResult.rows[0].count, 10);
+    const totalPages = Math.ceil(total / limit);
+
+    res.json({
+      data:       dataResult.rows,
+      pagination: { page, limit, total, totalPages },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to fetch units" });
