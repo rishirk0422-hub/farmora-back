@@ -1,5 +1,5 @@
 import express from "express";
-import { pool } from "../../config/pgdb.js"
+import { pool } from "../../config/pgdb.js";
 import { protect } from "../../middlewares/auth.middleware.js";
 
 const router = express.Router();
@@ -20,13 +20,29 @@ export const initCategoryTable = async () => {
   console.log("✅ Categories table ready");
 };
 
-// ─── GET all categories ───────────────────────────────────────────────────────
+// ─── GET all categories (paginated) ──────────────────────────────────────────
+// Query params: ?page=1&limit=10
 router.get("/", protect, async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT * FROM categories ORDER BY id DESC"
-    );
-    res.json(result.rows);
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
+    const offset = (page - 1) * limit;
+
+    const [dataResult, countResult] = await Promise.all([
+      pool.query(
+        "SELECT * FROM categories ORDER BY id DESC LIMIT $1 OFFSET $2",
+        [limit, offset]
+      ),
+      pool.query("SELECT COUNT(*) FROM categories"),
+    ]);
+
+    const total      = parseInt(countResult.rows[0].count, 10);
+    const totalPages = Math.ceil(total / limit);
+
+    res.json({
+      data:       dataResult.rows,
+      pagination: { page, limit, total, totalPages },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to fetch categories" });
@@ -60,7 +76,7 @@ router.post("/", protect, async (req, res) => {
     const createdBy = req.user?.fullName || req.user?.email || "System";
 
     const result = await pool.query(
-      `INSERT INTO categories 
+      `INSERT INTO categories
         (category_name, category_description, created_by, last_modified_by)
        VALUES ($1, $2, $3, $3)
        RETURNING *`,
