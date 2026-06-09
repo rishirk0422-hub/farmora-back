@@ -23,36 +23,10 @@ export const initCategoryTable = async () => {
 // ─── GET all categories ───────────────────────────────────────────────────────
 router.get("/", protect, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-
-    const offset = (page - 1) * limit;
-
-    // Get total records count
-    const countResult = await pool.query(
-      "SELECT COUNT(*) FROM categories"
-    );
-
-    const totalRecords = parseInt(countResult.rows[0].count);
-
-    // Get paginated records
     const result = await pool.query(
-      `SELECT *
-       FROM categories
-       ORDER BY id DESC
-       LIMIT $1 OFFSET $2`,
-      [limit, offset]
+      "SELECT * FROM categories ORDER BY id DESC"
     );
-
-    res.json({
-      data: result.rows,
-      pagination: {
-        currentPage: page,
-        pageSize: limit,
-        totalRecords,
-        totalPages: Math.ceil(totalRecords / limit),
-      },
-    });
+    res.json(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to fetch categories" });
