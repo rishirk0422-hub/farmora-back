@@ -22,6 +22,8 @@ import unitRoutes, { initUnitTable } from "./routes/masters/unit.routes.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 import { initSocket } from "./sockets/socket.js";
 import path from "path";
+// At the top of server.js
+const { i18next, middleware } = require('./i18n');   // ← ADD
 
 const app = express();
 const server = http.createServer(app);
@@ -47,6 +49,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(middleware.handle(i18next));
 app.options('*', cors(corsOptions));
 
 app.use(express.json());
@@ -64,8 +67,7 @@ const io = new Server(server, {
 initSocket(io);
 app.set("io", io);
 
-// At the top of server.js
-const { i18next, middleware } = require('./i18n');   // ← ADD
+
 
 // After app = express(), before your routes
 app.use(middleware.handle(i18next));  
