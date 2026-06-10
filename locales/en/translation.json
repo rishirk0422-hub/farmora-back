@@ -1,0 +1,21 @@
+{
+    "welcome": "Welcome",
+    "login": "Login",
+    "logout": "Logout",
+    "signup": "Sign Up",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": {
+      "notFound": "Page not found",
+      "serverError": "Something went wrong",
+      "unauthorized": "Please login to continue"
+    },
+    "success": {
+      "saved": "Saved successfully",
+      "deleted": "Deleted successfully"
+    }
+  }

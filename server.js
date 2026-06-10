@@ -64,6 +64,12 @@ const io = new Server(server, {
 initSocket(io);
 app.set("io", io);
 
+// At the top of server.js
+const { i18next, middleware } = require('./i18n');   // ← ADD
+
+// After app = express(), before your routes
+app.use(middleware.handle(i18next));  
+
 // ── MongoDB routes ──────────────────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
