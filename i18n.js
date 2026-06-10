@@ -1,8 +1,8 @@
-const i18next = require('i18next');
-const Backend = require('i18next-fs-backend');
-const middleware = require('i18next-http-middleware');
+import i18next from 'i18next';
+import Backend from 'i18next-fs-backend';
+import middleware from 'i18next-http-middleware';
 
-i18next
+await i18next
   .use(Backend)
   .use(middleware.LanguageDetector)
   .init({
@@ -11,8 +11,13 @@ i18next
     ns: ['translation'],
     defaultNS: 'translation',
     backend: {
-      loadPath: __dirname + '/locales/{{lng}}/{{ns}}.json'
+      loadPath: new URL('./locales/{{lng}}/{{ns}}.json', import.meta.url).pathname
+    },
+    detection: {
+      order: ['header', 'querystring'],
+      lookupQuerystring: 'lng',
+      lookupHeader: 'accept-language'
     }
   });
 
-module.exports = { i18next, middleware };
+export { i18next, middleware };

@@ -23,7 +23,7 @@ import { errorHandler } from "./middlewares/error.middleware.js";
 import { initSocket } from "./sockets/socket.js";
 import path from "path";
 // At the top of server.js
-const { i18next, middleware } = require('./i18n');   // ← ADD
+import { i18next, middleware } from './i18n.js';   // ← changed, note .js extension required
 
 const app = express();
 const server = http.createServer(app);
